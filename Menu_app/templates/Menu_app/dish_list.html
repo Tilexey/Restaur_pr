@@ -1,0 +1,18 @@
+{%extends 'base.html'%}
+
+{%block title%}Список блюд{%endblock%}
+
+{%block content%}
+<h1>Список блюд</h1>
+{%for dish in dishes%}
+    <div>
+        <h2>{{dish.name}}</h2>
+        {%if dish.image %}
+            <img src="{{dish.image.url}}">
+        {%endif%}
+        <p>Опис: {{dish.description}}</p>
+        <p>Ціна: {{dish.price}}</p>
+        <p>Інгредієнти: {{dish.ingredients}}</p>
+    </div>
+{%endfor%}
+{%endblock%}
