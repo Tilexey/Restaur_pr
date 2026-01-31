@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Ваш кошик{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">Ваше замовлення</h1>
+    
+    {% if cart.cart %}
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Страва</th>
+                <th class="text-center">Кількість</th>
+                <th>Ціна</th>
+                <th>Разом</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart %}
+            {% with dish=item.product %}
+            <tr>
+                <td>
+                    <h5 class="mb-0">{{ dish.name }}</h5>
+                </td>
+                
+                <td class="text-center">
+                    <div class="btn-group" role="group">
+                        {% if item.quantity > 1 %}
+                            <a href="{% url 'cart:update' dish.id 'decrement' %}" class="btn btn-outline-dark btn-sm fw-bold" style="width: 30px;">-</a>
+                        {% else %}
+                            <button class="btn btn-outline-secondary btn-sm" style="width: 30px;" disabled>-</button>
+                        {% endif %}
+                        
+                        <span class="btn btn-light btn-sm disabled text-dark border px-3">
+                            {{ item.quantity }}
+                        </span>
+
+                        <a href="{% url 'cart:update' dish.id 'increment' %}" class="btn btn-outline-dark btn-sm fw-bold" style="width: 30px;">+</a>
+                    </div>
+                </td>
+                
+                <td>{{ item.price }} грн</td>
+                <td>{{ item.total_price }} грн</td>
+                <td>
+                    <a href="{% url 'cart:remove' dish.id %}" class="btn btn-danger btn-sm">Видалити</a>
+                </td>
+            </tr>
+            {% endwith %}
+            {% endfor %}
+            
+            <tr class="table-dark">
+                <td colspan="3" class="text-end fs-5"><b>Всього до сплати:</b></td>
+                <td colspan="2" class="fs-5"><b>{{ cart.get_total_price }} грн</b></td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="d-flex justify-content-between mt-4">
+        <a href="/menu/" class="btn btn-outline-secondary btn-lg">← Продовжити покупки</a>
+        <a href="#" class="btn btn-success btn-lg">Оформити замовлення</a>
+    </div>
+
+    {% else %}
+    <div class="alert alert-info text-center">
+        <h4>Ваш кошик порожній 😔</h4>
+        <a href="/menu/" class="btn btn-primary mt-3">Перейти до меню</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

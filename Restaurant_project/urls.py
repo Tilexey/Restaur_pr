@@ -23,5 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('menu/', include('Menu_app.urls')),
     path('', include('Main_page_app.urls')),
+    path('cart/', include('Cart_app.urls'))
 ]
 
