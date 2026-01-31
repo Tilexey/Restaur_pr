@@ -1,9 +1,10 @@
 # cart/views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
-from django.contrib import messages # <--- Додайте імпорт повідомлень
+from django.contrib import messages 
 from Menu_app.models import Dish
 from .cart import Cart
+from Menu_app.models import Order, OrderItem
 
 @require_POST
 def cart_add(request, dish_id):
@@ -41,3 +42,29 @@ def cart_update(request, dish_id, action):
             cart.add(dish, quantity=-1)
             
     return redirect('cart:cart_detail')
+
+def order_create(request):
+    cart = Cart(request)
+    
+    if not cart.cart:
+        return redirect('menu_list') 
+
+    order = Order.objects.create(total_price=cart.get_total_price())
+    
+    for item in cart:
+        dish = item['product']
+        quantity = item['quantity']
+        
+        OrderItem.objects.create(
+            order=order,
+            dish=dish,
+            price=item['price'],
+            quantity=quantity
+        )
+        
+        dish.orders_count += quantity
+        dish.save()
+
+    cart.clear()
+    
+    return render(request, 'cart/created.html', {'order': order})

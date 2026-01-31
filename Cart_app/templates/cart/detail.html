@@ -58,12 +58,12 @@
     
     <div class="d-flex justify-content-between mt-4">
         <a href="/menu/" class="btn btn-outline-secondary btn-lg">← Продовжити покупки</a>
-        <a href="#" class="btn btn-success btn-lg">Оформити замовлення</a>
+        <a href="{% url 'cart:order_create' %}" class="btn btn-success btn-lg">Оформити замовлення</a>
     </div>
 
     {% else %}
     <div class="alert alert-info text-center">
-        <h4>Ваш кошик порожній 😔</h4>
+        <h4>Ваш кошик порожній </h4>
         <a href="/menu/" class="btn btn-primary mt-3">Перейти до меню</a>
     </div>
     {% endif %}
