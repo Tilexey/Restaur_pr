@@ -17,7 +17,6 @@ class DishView(ListView):
         search_query = self.request.GET.get('q')
         
         if search_query:    
-            queryset = queryset.filter(
-                Q(name__icontains=search_query) | Q(description__icontains=search_query) | Q(ingredients__icontains=search_query)   )
+            queryset = queryset.filter(Q(name__icontains=search_query) | Q(description__icontains=search_query) | Q(ingredients__icontains=search_query))
             
         return queryset
