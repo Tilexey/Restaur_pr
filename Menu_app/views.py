@@ -9,6 +9,14 @@ class DishView(ListView):
     template_name = 'dish_list.html'
     context_object_name = 'dishes'
     
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        #Популярні страви
+        context['popular_dishes'] = Dish.objects.order_by('-orders_count')[:3]
+        
+        return context
+    
     def get_queryset(self):
         #Все страви
         queryset = super().get_queryset()

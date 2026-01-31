@@ -6,43 +6,88 @@
 <div class="container py-5">
     <div class="text-center mb-5">
         <h1 class="display-4 fw-bold">Наше Меню</h1>
+        <p class="lead text-muted">Найкращі смаки твого міста</p>
         <hr class="w-25 mx-auto text-warning" style="height: 3px; opacity: 1;">
     </div>
 
     <div class="row justify-content-center mb-5">
         <div class="col-md-6">
-            <form action="" method="get" class="d-flex">
-                <div class="input-group">
-                    <input type="text" name="q" class="form-control form-control-lg" placeholder="Я хочу знайти..." value="{{ request.GET.q }}">
-                    <button class="btn btn-warning text-dark fw-bold" type="submit">Знайти</button>
-                    {% if request.GET.q %}
-                    <a href="/menu/" class="btn btn-outline-secondary d-flex align-items-center">✕</a>
-                    {% endif %}
-                </div>
+            <form action="" method="get" class="d-flex shadow-sm rounded-pill overflow-hidden">
+                <input type="text" name="q" class="form-control form-control-lg border-0 ps-4" placeholder="Я хочу знайти (напр. піца)..." value="{{ request.GET.q|default:'' }}">
+                <button class="btn btn-warning text-dark fw-bold px-4" type="submit">Знайти</button>
+                {% if request.GET.q %}
+                    <a href="{% url 'dish_list' %}" class="btn btn-light d-flex align-items-center border-start">✕</a>
+                {% endif %}
             </form>
         </div>
     </div>
 
+    {% if not request.GET.q and popular_dishes %}
+    <div class="mb-5">
+        <h3 class="fw-bold text-danger mb-4"> Хіти продажу</h3>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for dish in popular_dishes %}
+            <div class="col">
+                <div class="card h-100 border-danger shadow position-relative">
+                    <div class="position-absolute top-0 start-0 bg-danger text-white px-3 py-1 rounded-end fw-bold z-1 shadow-sm">
+                        TOP {{ forloop.counter }}
+                    </div>
+                    
+                    <div style="height: 250px; overflow: hidden;">
+                        {% if dish.image %}
+                            <img src="{{ dish.image.url }}" class="card-img-top w-100 h-100" style="object-fit: cover;" alt="{{ dish.name }}">
+                        {% else %}
+                            <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-secondary text-white">Фото скоро буде </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold">{{ dish.name }}</h5>
+                        <p class="card-text text-muted small flex-grow-1">{{ dish.description|truncatewords:10 }}</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="fs-4 fw-bold text-primary">{{ dish.price }} грн</span>
+                            
+                            <form action="{% url 'cart:cart_add' dish.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger text-white rounded-pill px-4 shadow-sm">
+                                    Хочу!
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <hr class="my-5 text-muted">
+    </div>
+    {% endif %}
+
+    <h3 class="fw-bold mb-4"> Всі страви</h3>
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         
         {% for dish in dishes %}
         <div class="col">
-            <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+            <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden hover-card">
                 
                 <div style="height: 250px; overflow: hidden; position: relative;">
                     {% if dish.image %}
-                        <img src="{{ dish.image.url }}" class="card-img-top w-100 h-100" style="object-fit: cover;" alt="{{ dish.name }}">
+                        <img src="{{ dish.image.url }}" class="card-img-top w-100 h-100" style="object-fit: cover; transition: transform 0.3s ease;" alt="{{ dish.name }}">
                     {% else %}
-                        <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-secondary text-white"><span>Фото скоро буде 📸</span></div>
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-light text-muted">
+                            <span>Фото скоро буде </span>
+                        </div>
                     {% endif %}
-                    <span class="position-absolute bottom-0 end-0 bg-warning text-dark px-3 py-2 fw-bold rounded-start-3">
+                    <span class="position-absolute bottom-0 end-0 bg-warning text-dark px-3 py-2 fw-bold rounded-start-3 shadow-sm">
                         {{ dish.price }} грн
                     </span>
                 </div>
 
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title fw-bold fs-4">{{ dish.name }}</h5>
-                    <p class="card-text flex-grow-1">{{ dish.description }}</p>
+                    
+                    <p class="card-text text-muted flex-grow-1">{{ dish.description|truncatewords:15 }}</p>
                     
                     <div class="mt-3 d-flex gap-2">
                         <form action="{% url 'cart:cart_add' dish.id %}" method="post" class="flex-grow-1">
@@ -53,7 +98,7 @@
                         </form>
                         
                         {% if dish.ingredients %}
-                        <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-toggle="modal" data-bs-target="#ingredientsModal-{{ dish.id }}">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#ingredientsModal-{{ dish.id }}">
                             Склад
                         </button>
                         {% endif %}
@@ -65,15 +110,17 @@
             <div class="modal fade" id="ingredientsModal-{{ dish.id }}" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
-                        <div class="modal-header">
+                        <div class="modal-header border-0">
                             <h1 class="modal-title fs-5 fw-bold">Склад: {{ dish.name }}</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
-                        <div class="modal-body">
-                            <p class="fs-5 text-muted">{{ dish.ingredients }}</p>
+                        <div class="modal-body bg-light rounded-3 m-3">
+                            <p class="fs-5 text-dark mb-0 fst-italic">
+                                <span class="fs-4">🥗</span> {{ dish.ingredients }}
+                            </p>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Зрозуміло</button>
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Зрозуміло</button>
                         </div>
                     </div>
                 </div>
@@ -82,8 +129,9 @@
             
         </div>
         {% empty %}
-            <div class="col-12 text-center">
-                <p class="text-muted">Нічого не знайдено.</p>
+            <div class="col-12 text-center py-5">
+                <div class="text-muted fs-4"> На жаль, нічого не знайдено.</div>
+                <a href="{% url 'dish_list' %}" class="btn btn-outline-primary mt-3">Показати все меню</a>
             </div>
         {% endfor %}
 
@@ -94,19 +142,20 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-success text-white">
-                <h5 class="modal-title">Готово! </h5>
+                <h5 class="modal-title fw-bold">Готово! </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body text-center py-4">
-                <h4 class="text-success mb-3">Товар успішно додано!</h4>
-                <p class="mb-0 text-muted">Бажаєте продовжити вибір страв чи перейти до оплати?</p>
+            <div class="modal-body text-center py-5">
+                <div class="mb-3 text-success" style="font-size: 3rem;">✅</div>
+                <h4 class="fw-bold text-dark">Товар успішно додано!</h4>
+                <p class="text-muted">Смачний вибір. Що робимо далі?</p>
             </div>
-            <div class="modal-footer justify-content-center bg-light border-0">
-                <button type="button" class="btn btn-outline-dark px-4" data-bs-dismiss="modal">
+            <div class="modal-footer justify-content-center bg-light border-0 py-3">
+                <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">
                     Продовжити покупки
                 </button>
-                <a href="{% url 'cart:cart_detail' %}" class="btn btn-success px-4 fw-bold">
-                    Перейти в кошик
+                <a href="{% url 'cart:cart_detail' %}" class="btn btn-success px-5 rounded-pill fw-bold shadow-sm">
+                    В кошик
                 </a>
             </div>
         </div>
@@ -123,5 +172,18 @@
         {% endfor %}
     });
 </script>
+
+<style>
+    .hover-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    .hover-card:hover img {
+        transform: scale(1.05); /* Легке збільшення картинки */
+    }
+</style>
 
 {% endblock %}
