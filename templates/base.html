@@ -1,17 +1,109 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurant: {%block title%}{%endblock%}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <title>{% block title %}Restaurant{% endblock %}</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        /* Притискаємо футер до низу */
+        body { display: flex; flex-direction: column; min-height: 100vh; background-color: #f8f9fa; }
+        main { flex: 1; }
+
+        /* Стиль для логотипу по центру */
+        .brand-centered {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+        }
+
+        /* На мобільному прибираємо центрування, щоб не ламалася верстка */
+        @media (max-width: 991px) {
+            .brand-centered {
+                position: static;
+                transform: none;
+                margin: 0 auto;
+            }
+        }
+        
+        .nav-link {
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 <body>
-    {% include 'menu.html'%}
-    <main class='container'>
-    {%block content%}
-    {%endblock%}
+
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top py-3">
+            <div class="container-fluid px-lg-5 position-relative">
+                
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <a class="navbar-brand" href="/">
+                    <img src="{% static 'logo2.png' %}" alt="Bootstrap" width="90" height="72" >
+                  </a>
+
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">Головна</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/menu/">Меню</a>
+                        </li>
+                    </ul>
+
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a href="{% url 'cart:cart_detail' %}" class="btn btn-dark rounded-pill px-4">
+                                <i class="bi bi-cart3 me-2"></i> Кошик
+                            </a>
+                        </li>
+                    </ul>
+
+                </div>
+                
+                <a href="{% url 'cart:cart_detail' %}" class="d-lg-none text-dark fs-4">
+                    <i class="bi bi-cart3"></i>
+                </a>
+
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        {% if messages %}
+            <div class="container mt-3">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
     </main>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
+    <footer class="bg-dark text-white text-center py-4 mt-auto">
+        <div class="container">
+            <p class="mb-0 text-white-50"><small>© 2026 Всі права захищені.</small></p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
